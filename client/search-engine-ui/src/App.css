@@ -1,0 +1,52 @@
+/* App Container */
+.app-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f7f7f7; /* Optional background color */
+}
+
+/* Inner Content Box */
+.app-content {
+  diplay: flex;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 400px; /* Adjust the width as per your design */
+}
+
+/* Tab Navigation Styles */
+.tab-navigation {
+  margin-bottom: 20px;
+}
+
+.tab-navigation button {
+  margin-right: 10px;
+  padding: 10px 20px;
+  border: none;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.tab-navigation button:hover {
+  background-color: #ddd;
+}
+
+.tab-navigation button:focus,
+.tab-navigation button.active {
+  background-color: #007bff;
+  color: white;
+  outline: none;
+}
+
+.tab-content {
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+}
