@@ -1,15 +1,14 @@
 package com.neo.powersearch.search.service.impl;
 
-import java.io.IOException;
-import java.io.StringReader;
-
 import com.neo.powersearch.search.service.StemmingService;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.en.PorterStemFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.io.StringReader;
 
 @Service
 public class StemmingServiceImpl implements StemmingService {

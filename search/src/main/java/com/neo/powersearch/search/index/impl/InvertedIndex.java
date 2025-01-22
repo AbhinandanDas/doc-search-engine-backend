@@ -1,4 +1,4 @@
-package com.neo.powersearch.search.index;
+package com.neo.powersearch.search.index.impl;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -9,10 +9,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.springframework.stereotype.Component;
 
-@Component
-public class InvertedIndex {
+import com.neo.powersearch.search.index.InvertedIndexing;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+
+@Service
+@Qualifier("DefaultInvertedIndex")
+public class InvertedIndex implements InvertedIndexing {
     private Map<String, Set<String>> index = new HashMap();
 
     public void add(String word, String docId) {
@@ -22,7 +26,7 @@ public class InvertedIndex {
         })).add(docId);
     }
 
-    public Set search(String word) {
+    public Set<String> search(String word) {
         word = word.toLowerCase();
         return (Set)(!this.index.containsKey(word) ? new HashSet() : (Set)this.index.get(word));
     }
@@ -73,5 +77,15 @@ public class InvertedIndex {
             var10000.println("The word: " + var10001 + "is present in documents: " + String.valueOf(entry.getValue()));
         }
 
+    }
+
+    @Override
+    public void addWord(String content, String docId) {
+
+    }
+
+    @Override
+    public Map<String, Integer> searchTerm(String term) {
+        return null;
     }
 }

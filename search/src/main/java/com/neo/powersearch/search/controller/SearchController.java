@@ -1,9 +1,10 @@
 package com.neo.powersearch.search.controller;
 
 
-import com.neo.powersearch.search.index.InvertedIndex;
+import com.neo.powersearch.search.index.InvertedIndexing;
 import com.neo.powersearch.search.model.Document;
 import com.neo.powersearch.search.repository.DocumentRepository;
+import com.neo.powersearch.search.service.PageRankService;
 import com.neo.powersearch.search.service.StemmingService;
 import com.neo.powersearch.search.service.SuggestionService;
 import com.neo.powersearch.search.service.SynonymService;
@@ -12,6 +13,7 @@ import jakarta.transaction.Transactional;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,7 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
 @Transactional
 public class SearchController {
     @Autowired
-    private InvertedIndex invertedIndex;
+    @Qualifier("RankedInvertedIndex")
+    private InvertedIndexing invertedIndex;
     @Autowired
     private StemmingService stemmingService;
     @Autowired
@@ -37,6 +40,9 @@ public class SearchController {
 
     @Autowired
     private SynonymService synonymService;
+
+    @Autowired
+    private PageRankService pageRankService;
 
     public SearchController() {
     }
@@ -57,24 +63,31 @@ public class SearchController {
         Set<String> synonyms = new HashSet<>(synonymService.getSynonyms(term));
 
         // Searching the words(stemmed + synonmys)
-        Set<String> documentIds = this.invertedIndex.searchByMultipleWords(searchList);
+        Map<String,Double> docsWithRank = this.pageRankService.rankDocuments(searchList);
         for(String synonym : synonyms) {
-            documentIds.addAll(this.invertedIndex.searchByMultipleWords(Collections.singletonList(synonym)));
+            docsWithRank.putAll(this.pageRankService.rankDocuments(Collections.singletonList(synonym)));
         }
-        if (documentIds.isEmpty()) {
+
+        // Sort the document by score in descending order
+        Map<String,Double> sortedDocs = new TreeMap<>((a,b) -> docsWithRank.get(b).compareTo(docsWithRank.get(a)));
+
+        sortedDocs.putAll(docsWithRank);
+
+//        Set<String> documentIds = this.invertedIndex.searchByMultipleWords(searchList);
+//        for(String synonym : synonyms) {
+//            documentIds.addAll(this.invertedIndex.searchByMultipleWords(Collections.singletonList(synonym)));
+//        }
+        List<String> documentNames = new ArrayList<>();
+        if (sortedDocs.isEmpty()) {
             return ResponseEntity.notFound().build();
         } else {
-            List<String> documentNames = new ArrayList<>();
-            Iterator<String> var11 = documentIds.iterator();
-
-            while(var11.hasNext()) {
-                String docId = (String)var11.next();
+            for(String docId : sortedDocs.keySet()) {
                 Optional<Document> document = this.documentRepository.findByDocId(docId);
-                if (document.isPresent()) {
-                    documentNames.add(((Document)document.get()).getFileName());
+                System.out.println("Current Doc ID: " + docId);
+                if(document.isPresent()) {
+                    documentNames.add(document.get().getFileName());
                 }
             }
-
             return ResponseEntity.ok(documentNames);
         }
     }

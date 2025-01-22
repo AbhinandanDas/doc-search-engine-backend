@@ -1,13 +1,15 @@
 package com.neo.powersearch.search.service;
 
-import com.neo.powersearch.search.index.InvertedIndex;
+import com.neo.powersearch.search.index.InvertedIndexing;
+import com.neo.powersearch.search.index.impl.InvertedIndex;
 import com.neo.powersearch.search.model.Document;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
-import java.util.Iterator;
+
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,7 +20,8 @@ public class NewInvertedIndexService {
     @Autowired
     private StemmingService stemmingService;
     @Autowired
-    public InvertedIndex invertedIndex;
+    @Qualifier("RankedInvertedIndex")
+    private InvertedIndexing invertedIndex;
 
     @PostConstruct
     public void buildIndex() {
@@ -36,7 +39,7 @@ public class NewInvertedIndexService {
                     String word = var7[var9];
                     String stemmedWord = this.stemmingService.stem(word);
                     System.out.println("Building index: " + word + " = " + stemmedWord);
-                    this.invertedIndex.add(stemmedWord, docId);
+                    this.invertedIndex.addWord(stemmedWord, docId);
                 }
             }
 
@@ -49,13 +52,12 @@ public class NewInvertedIndexService {
             Document document = (Document)fetchDocument.get();
             String content = document.getContent();
             String[] words = content.toLowerCase().split("\\W+");
-            String[] var6 = words;
-            int var7 = words.length;
+            int n = words.length;
 
-            for(int var8 = 0; var8 < var7; ++var8) {
-                String word = var6[var8];
+            for(int i = 0; i < n; ++i) {
+                String word = words[i];
                 String stemmedWord = this.stemmingService.stem(word);
-                this.invertedIndex.add(stemmedWord, docId);
+                this.invertedIndex.addWord(stemmedWord, docId);
             }
         }
 

@@ -15,8 +15,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import static com.amazonaws.regions.Regions.*;
-
 @Service
 public class FileUploadS3ServiceImpl implements FileUploadService {
     private final AmazonS3 s3Client;
